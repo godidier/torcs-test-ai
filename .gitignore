@@ -4,4 +4,4 @@
 *.def
 *.o
 *.def
-
+.depend
