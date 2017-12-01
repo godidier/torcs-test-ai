@@ -9,6 +9,7 @@ const float Driver::G = 9.81; /* [m/(s*s)] */
 const float Driver::FULL_ACCEL_MARGIN = 1.0; /* [m/s] */
 const float Driver::LOOKAHEAD_CONST = 17.0; /* [m] */
 const float Driver::LOOKAHEAD_FACTOR = 0.33; /* [1/s] */
+const float Driver::WIDTHDIV = 4.0; /* [-] */
 
 
 Driver::Driver(int index)
@@ -50,11 +51,10 @@ void Driver::drive(tCarElt* car, tSituation *s)
 		car->ctrl.gear = 4;
 		car->ctrl.brakeCmd = getBrake(car);
 		if (car->ctrl.brakeCmd == 0.0){
-			car->ctrl.accelCmd = getAccel(car);
+			car->ctrl.accelCmd = filterTrk(getAccel(car), car);
 		} else {
 			car->ctrl.accelCmd = 0.0;
 		}
-
 	}
 }
 
@@ -215,4 +215,26 @@ float Driver::getSteer(tCarElt* car){
 }
 
 
+/* Hold the car on the track */
+float Driver::filterTrk(float accel, tCarElt* car)
+{
+	tTrackSeg* seg = car->_trkPos.seg;
+
+	if (car->_speed_x < MAX_UNSTUCK_SPEED) return accel;
+
+	if (seg->type == TR_STR) {
+		float tm  = fabs(car->_trkPos.toMiddle);
+		float w = seg->width/WIDTHDIV;
+		if  (tm > w) return 0.0; else return accel;
+	} else {
+		float sign = (seg->type == TR_RGT) ? -1 : 1;	
+		if (car->_trkPos.toMiddle * sign > 0.0){
+			return accel;
+		} else {
+			float tm = fabs(car->_trkPos.toMiddle);
+			float w = seg->width/WIDTHDIV;
+			if (tm > w) return 0.0; else return accel;
+		}
+	}
+}
 

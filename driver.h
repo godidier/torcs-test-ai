@@ -35,6 +35,7 @@ class Driver{
 		float getBrake(tCarElt* car);
 		float getSteer(tCarElt* car);
 		v2d getTargetPoint(tCarElt* car);
+		float filterTrk(float accel, tCarElt* car);
 
 	private:
 		/* utility function */
@@ -59,6 +60,7 @@ class Driver{
 		static const float FULL_ACCEL_MARGIN;
 		static const float LOOKAHEAD_CONST;
 		static const float LOOKAHEAD_FACTOR;
+		static const float WIDTHDIV;
 
 		/* track variables */
 		tTrack* track;
