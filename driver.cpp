@@ -105,8 +105,17 @@ float Driver::getAllowedSpeed(tTrackSeg *segment)
 	if(segment->type == TR_STR){
 		return FLT_MAX;
 	} else {
+		float arc = 0.0;
+		tTrackSeg *s = segment;
+
+		while(s->type == segment->type && arc < PI/2.0){
+			arc += s->arc;
+			s = s->next;	
+		}
+		arc /= PI/2.0;
 		float mu = segment->surface->kFriction;
-		return sqrt(mu*G*segment->radius);
+		float r = (segment->radius + segment->width/2.0) / sqrt(arc);
+		return sqrt((mu*G*r)/(1.0 - MIN(1.0, r*CA*mu/mass)));
 	}
 }
 
